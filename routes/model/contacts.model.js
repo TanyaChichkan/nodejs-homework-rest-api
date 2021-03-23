@@ -58,7 +58,7 @@ class Contact {
   };
 
   updateContact = async (contactID, userData) => {
-    return await this.db.findByIdAndUpdate({ _id: contactID }, userData);
+    return await this.db.findByIdAndUpdate({ _id: contactID }, userData, {new:true});
   };
 }
 
