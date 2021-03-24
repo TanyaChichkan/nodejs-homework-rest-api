@@ -4,12 +4,12 @@ const contactSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Name is missing'],
       unique: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is missing'],
       unique: true,
     },
     phone: {
@@ -17,7 +17,7 @@ const contactSchema = new mongoose.Schema(
       minlength: 12,
       maxlength: 12,
       unique: true,
-      required: true,
+      required: [true, 'Phone number is missing'],
     },
     subscription: {
       type: 'String',
@@ -25,7 +25,6 @@ const contactSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
       default: 'password',
     },
     token: {
@@ -58,7 +57,7 @@ class Contact {
   };
 
   updateContact = async (contactID, userData) => {
-    return await this.db.findByIdAndUpdate({ _id: contactID }, userData, {new:true});
+    return await this.db.findByIdAndUpdate({ _id: contactID }, userData, { new: true });
   };
 }
 
