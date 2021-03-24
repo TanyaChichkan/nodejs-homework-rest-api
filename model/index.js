@@ -15,7 +15,7 @@ const listContacts = async () => {
 const getContactById = async (contactId) => {
   try {
     const data = await listContacts()
-    const userById = data.find(contact => String(contact.id) === contactId)
+    const userById = data.find((contact) => String(contact.id) === contactId)
     return userById
   } catch (err) {
     console.error(err.message)
@@ -54,8 +54,10 @@ const updateContact = async (contactId, body) => {
   try {
     const data = await listContacts()
     const updatedContact = { id: contactId, ...body }
-    const updatedContacts = data.map(contact => String(contact.id) === updatedContact.id ? { ...updatedContact } : contact)
-    const index = updatedContacts.findIndex(contact => String(contact.id) === contactId)
+    const updatedContacts = data.map((contact) =>
+      String(contact.id) === updatedContact.id ? { ...updatedContact } : contact
+    )
+    const index = updatedContacts.findIndex((contact) => String(contact.id) === contactId)
 
     await fs.writeFile(contactsPath, JSON.stringify(updatedContacts))
     return updatedContacts[index]
