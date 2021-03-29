@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const contactSchema = new mongoose.Schema(
   {
@@ -20,20 +21,33 @@ const contactSchema = new mongoose.Schema(
       required: [true, 'Phone number is missing'],
     },
     subscription: {
-      type: 'String',
-      default: 'free',
+      type: String,
+      enum: ["free", "pro", "premium"],
+      default: "free"
     },
     password: {
       type: String,
-      default: 'password',
+      require:[true, 'Password is missing'],
     },
     token: {
       type: 'String',
-      default: '',
     },
+    role:{
+      type:String,
+      required:true,
+      default:"USER"
+    }
   },
   { versionKey: false, timestamps: false }
 );
+
+contactSchema.methods.setPassword=(password)=>{
+  this.password = bcrypt.hashSync(password,bcrypt.genSaltSync(6))
+}
+
+contactSchema.methods.validPassword = (password)=>{
+  return bcrypt.compareSync(password,this.password)
+}
 
 class Contact {
   constructor() {
@@ -59,6 +73,10 @@ class Contact {
   updateContact = async (contactID, userData) => {
     return await this.db.findByIdAndUpdate({ _id: contactID }, userData, { new: true });
   };
+
+  findUserByEmail = async(query)=>{
+    return await this.db.findOne(query);
+  }
 }
 
 module.exports = new Contact();

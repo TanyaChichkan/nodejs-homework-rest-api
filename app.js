@@ -6,6 +6,7 @@ const dotenv = require('dotenv')
 
 const app = express()
 const contactsRouter = require('./routes/api/contacts')
+const authRouter = require('./routes/auth/auth.routes')
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 dotenv.config()
 
@@ -25,7 +26,8 @@ const runServer = async () => {
     app.use(cors())
     app.use(express.json())
 
-    app.use('/api/contacts', contactsRouter)
+    app.use('/auth',authRouter);
+    app.use('/api/contacts', contactsRouter);
 
     app.use((req, res) => {
       res.status(404).json({ message: 'Contact is not found' })
