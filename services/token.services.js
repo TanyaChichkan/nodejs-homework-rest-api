@@ -2,25 +2,38 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
+const { User } = require('../users-model/user.model');
 
 dotenv.config();
-const {ACCESS_KEY} = process.env;
-const {ExtractJwt, Strategy} = passportJWT;
+const { ACCESS_KEY } = process.env;
+const { ExtractJwt, Strategy } = passportJWT;
 
-const jwtOptions = {
-    secretOrKey:ACCESS_KEY,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
-}
+// const jwtOptions = {
+//   secretOrKey: ACCESS_KEY,
+//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+// };
 
-const createVerifiedToken = async payload=>{
-    return await jwt.sign(payload, ACCESS_KEY);
+// passport.use(
+//     new Strategy(jwtOptions, async (payload, done)=> {
+
+//      const user = await User.find({ _id: payload.id })
+//         if(user){
+//             done(null,user)
+//         }
+//     }),
+//   )
+
+const createVerifiedToken = async (payload) => {
+  const token = await jwt.sign(payload, ACCESS_KEY, { expiresIn: '1h' });
+  return `Bearer ${token}`;
 };
 
-const verifyToken = async token=>{
-    return await jwt.verify(token, ACCESS_KEY);
-}
+const verifyToken = async (token) => {
+  const parsedToken = token.replace('Bearer', '');
+  return await jwt.verify(parsedToken, ACCESS_KEY);
+};
 
-module.exports={
-    createVerifiedToken,
-    verifyToken
-}
+module.exports = {
+  createVerifiedToken,
+  verifyToken,
+};

@@ -1,8 +1,9 @@
-const ContactDB = require('../contacts-model/contacts.model');
+const ContactDB = require('./contacts.model');
 
 const getContactsContr = async (req, res, next) => {
   try {
-    const contacts = await ContactDB.getContacts();
+    const userId = req.userId;
+    const contacts = await ContactDB.getContacts(userId);
     res.json({
       status: 200,
       message: 'List of contacts',
@@ -18,7 +19,8 @@ const getContactByIdContr = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const contact = await ContactDB.getContactsByID(contactId);
+    const userId = req.userId;
+    const contact = await ContactDB.getContactsByID(userId, contactId);
     contact
       ? res.json({
           status: 200,
@@ -76,7 +78,8 @@ const createContactContr = async (req, res, next) => {
 
   if (name && email && phone) {
     try {
-      const newContact = await ContactDB.createContact(body);
+      const userId = req.userId;
+      const newContact = await ContactDB.createContact(userId, body);
       res.json({
         status: 201,
         message: 'Contact added',
@@ -98,7 +101,8 @@ const deleteContactContr = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const index = await ContactDB.deleteContact(contactId);
+    const userId = req.userId;
+    const index = await ContactDB.deleteContact(userId, contactId);
     console.log(index);
 
     index !== -1
@@ -117,29 +121,35 @@ const deleteContactContr = async (req, res, next) => {
 };
 
 const updateContactContr = async (req, res, next) => {
-  const { contactId } = req.params;
-  const { body } = req;
+  try {
+    const { contactId } = req.params;
+    const { body } = req;
 
-  if (body) {
-    const updatedContact = await ContactDB.updateContact(contactId, body);
+    if (body) {
+      const userId = req.userId;
+      const updatedContact = await ContactDB.updateContact(userId, contactId, body);
 
-    if (updatedContact) {
-      res.json({
-        status: 200,
-        message: 'Contact is updated',
-        data: updatedContact,
-      });
+      if (updatedContact) {
+        res.json({
+          status: 200,
+          message: 'Contact is updated',
+          data: updatedContact,
+        });
+      } else {
+        res.json({
+          status: 404,
+          message: 'Not found',
+        });
+      }
     } else {
       res.json({
-        status: 404,
-        message: 'Not found',
+        status: 400,
+        message: 'missing fields',
       });
     }
-  } else {
-    res.json({
-      status: 400,
-      message: 'missing fields',
-    });
+  } catch (e) {
+    console.log(e);
+    next(e);
   }
 };
 
