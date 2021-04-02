@@ -1,5 +1,5 @@
 const { verifyToken } = require('../services/token.services');
-const ContactDB = require('../contacts/contacts.model');
+const UserDB = require('../users-model/user.model');
 
 const checkAuthTokenMiddleware = async (req, res, next) => {
   try {
@@ -14,7 +14,7 @@ const checkAuthTokenMiddleware = async (req, res, next) => {
 
     const data = await verifyToken(token);
     req.userId = data.id;
-    const userInfo = await ContactDB.findUserById(data.id);
+    const userInfo = await UserDB.findUserById(data.id);
     req.user = userInfo;
     return next();
   } catch (e) {

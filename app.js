@@ -3,14 +3,19 @@ const logger = require('morgan')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
+const path = require('path')
+const IMG_DIR = path.join(__dirname,'public','images') 
+
+
 
 const app = express()
 const contactsRouter = require('./contacts/contacts.routes')
 const authRouter = require('./auth/auth.routes')
+const uploadRouter = require('./auth/upload.routes')
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 dotenv.config()
 
-require('./services/token.services')
+
 
 const runServer = async () => {
   try {
@@ -28,8 +33,11 @@ const runServer = async () => {
     app.use(cors())
     app.use(express.json())
 
+    app.use(express.static(IMG_DIR));
+    
     app.use('/auth', authRouter)
     app.use('/api/contacts', contactsRouter)
+    app.use('/users',uploadRouter)
 
     app.use((req, res) => {
       res.status(404).json({ message: 'Contact is not found' })
