@@ -9,7 +9,7 @@ const STATIC_DIR = path.join(__dirname, '/public');
 const app = express();
 const contactsRouter = require('./contacts/contacts.routes');
 const authRouter = require('./auth/auth.routes');
-const uploadRouter = require('./auth/upload.routes');
+const uploadRouter = require('./upload/upload.routes');
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
 dotenv.config();
 
