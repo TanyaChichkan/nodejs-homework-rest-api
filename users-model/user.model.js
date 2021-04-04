@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const gravatar = require('gravatar');
+const { nanoid } = require('nanoid');
+const EmailService = require('../verification/email');
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,10 +29,18 @@ const userSchema = new mongoose.Schema(
       default: 'USER',
     },
     avatarURL: {
-      type:String,
-      default: function(){
-        return gravatar.url(this.email, {s:'250'}, true)
-      }
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: '250' }, true);
+      },
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verifyToken: {
+      type: String,
+      required: [true, 'Verify token is required'],
     },
   },
   { versionKey: false, timestamps: false }
@@ -47,10 +57,22 @@ userSchema.methods.validPassword = (password) => {
 class User {
   constructor() {
     this.db = mongoose.model('user', userSchema);
+    this.emailService = new EmailService();
   }
 
   createContact = async (userData) => {
-    return await this.db.create(userData);
+    const { email } = userData;
+    const verifyToken = nanoid();
+    await this.sendEmail(verifyToken, email);
+    return await this.db.create({ ...userData, verifyToken });
+  };
+
+  sendEmail = async (verifyToken, email) => {
+    try {
+      await this.emailService.sendEmail(verifyToken, email);
+    } catch (err) {
+      throw new Error('Service unavailable');
+    }
   };
 
   findUserByEmail = async (query) => {
@@ -66,12 +88,23 @@ class User {
   };
 
   changeAvatar = async (userId, data) => {
-    return await this.db.findByIdAndUpdate(
-      {_id:userId},
-      { $set: { avatarURL: data } }
-   )
+    return await this.db.findByIdAndUpdate({ _id: userId }, { $set: { avatarURL: data } });
   };
 
+  findByField = async (field) => {
+    return this.db.findOne(field);
+  };
+
+  verifyUser = async ({ token }) => {
+    const user = await this.findByField({ verificationToken: token });
+    console.log(user);
+    if (user && !user.verify) {
+      await user.updateOne({ verify: true, verifyToken: null });
+      return true;
+    }
+
+    return false;
+  };
 }
 
 module.exports = new User();
