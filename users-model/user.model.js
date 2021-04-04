@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const gravatar = require('gravatar');
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,6 +25,12 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: 'USER',
+    },
+    avatarURL: {
+      type:String,
+      default: function(){
+        return gravatar.url(this.email, {s:'250'}, true)
+      }
     },
   },
   { versionKey: false, timestamps: false }
@@ -57,6 +64,14 @@ class User {
   updateToken = async (id, token) => {
     return await this.db.updateOne({ _id: id }, { token });
   };
+
+  changeAvatar = async (userId, data) => {
+    return await this.db.findByIdAndUpdate(
+      {_id:userId},
+      { $set: { avatarURL: data } }
+   )
+  };
+
 }
 
 module.exports = new User();

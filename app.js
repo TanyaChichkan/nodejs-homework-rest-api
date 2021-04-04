@@ -1,16 +1,17 @@
-const express = require('express')
-const logger = require('morgan')
-const cors = require('cors')
-const mongoose = require('mongoose')
-const dotenv = require('dotenv')
+const express = require('express');
+const logger = require('morgan');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const path = require('path');
+const STATIC_DIR = path.join(__dirname, '/public');
 
-const app = express()
-const contactsRouter = require('./contacts/contacts.routes')
-const authRouter = require('./auth/auth.routes')
-const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
-dotenv.config()
-
-require('./services/token.services')
+const app = express();
+const contactsRouter = require('./contacts/contacts.routes');
+const authRouter = require('./auth/auth.routes');
+const uploadRouter = require('./auth/upload.routes');
+const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
+dotenv.config();
 
 const runServer = async () => {
   try {
@@ -21,28 +22,30 @@ const runServer = async () => {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,
-    })
-    console.log('Database connection is successful')
+    });
+    console.log('Database connection is successful');
+    app.use(express.static('public'));
 
-    app.use(logger(formatsLogger))
-    app.use(cors())
-    app.use(express.json())
+    app.use(logger(formatsLogger));
+    app.use(cors());
+    app.use(express.json());
 
-    app.use('/auth', authRouter)
-    app.use('/api/contacts', contactsRouter)
+    app.use('/auth', authRouter);
+    app.use('/api/contacts', contactsRouter);
+    app.use('/users', uploadRouter);
 
     app.use((req, res) => {
-      res.status(404).json({ message: 'Contact is not found' })
-    })
+      res.status(404).json({ message: 'Contact is not found' });
+    });
 
     app.use((err, req, res, next) => {
-      res.status(500).json({ message: err.message })
-    })
+      res.status(500).json({ message: err.message });
+    });
   } catch (err) {
-    process.exit(1)
+    process.exit(1);
   }
-}
+};
 
-runServer()
+runServer();
 
-module.exports = app
+module.exports = app;

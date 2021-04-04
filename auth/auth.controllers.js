@@ -1,6 +1,8 @@
 const UserDB = require('../users-model/user.model')
 const bcrypt = require('bcrypt')
 const dotenv = require('dotenv')
+const {avatarCreator, changeAvatarURL} = require('./createAvatarfile')
+
 dotenv.config()
 const { createVerifiedToken } = require('../services/token.services')
 
@@ -24,7 +26,13 @@ const registrationController = async (req, res, next) => {
     const result = await UserDB.createContact({
       ...req.body,
       password: hashedPassword,
-    })
+    });
+
+    const avatar = result.avatarURL; 
+    const avatarURL =  avatarCreator(avatar,result.id);
+
+    const newContact = await UserDB.changeAvatar(result.id, avatarURL)
+    
     res.status(201).json({
       status: 'Created',
       code: 201,
@@ -100,8 +108,37 @@ const logoutController = async (req, res, next) => {
   }
 }
 
+const uploadController=async(req, res, next)=>{
+  try{
+    const file = req.file;
+    const newURL = changeAvatarURL(`${req.userId}.jpg`);
+    const result = await UserDB.changeAvatar(req.userId,newURL);
+
+    if(result){
+      res.json({
+        status: "OK",
+        code: 200,
+        message:{
+          avatarURL:newURL
+        }
+      })
+    }else {
+      res.json({
+        status: "BAD",
+        code: 401,
+        message: "Not authorized"
+      })
+    }
+    
+  }catch(e){
+    console.log(e)
+    next(e)
+  }
+}
+
 module.exports = {
   registrationController,
   loginController,
   logoutController,
+  uploadController
 }
