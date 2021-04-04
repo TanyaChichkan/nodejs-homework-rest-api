@@ -23,7 +23,7 @@ class EmailService {
           button: {
             color: '#22BC66',
             text: 'Confirm your account',
-            link: `https://localhost:3000/users/verify/:${verifyToken}`,
+            link: `https://localhost:3000/users/verify/${verifyToken}`,
           },
         },
         outro: "Need help, or have questions? Just reply to this email, we'd love to help.",
