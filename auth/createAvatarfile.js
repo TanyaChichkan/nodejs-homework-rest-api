@@ -13,7 +13,7 @@ const avatarCreator = (url, userId) => {
       response.pipe(file);
     });
 
-    moveAvatar(file, fileName);
+    // moveAvatar(file, fileName);
 
     const avatarURL = changeAvatarURL(fileName);
     return avatarURL;
